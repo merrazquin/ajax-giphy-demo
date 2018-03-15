@@ -40,11 +40,26 @@
 const GIPHY_API_KEY = "3p7b4CMXTX8JPnjVpCpn9CM7uDYuPNAe";
 
 var topics = ["pasta", "pizza", "sushi", "ramen"];
+var defaultLimit = 10;
 
 function setupTopicButtons() {
     topics.forEach(topic => {
-        $("#topic-buttons").append($("<button>").addClass("btn btn-default").text(topic));
+        $("#topic-buttons").append($("<button>").addClass("btn btn-default topic").text(topic));
     });
+    
+    $(".topic").click(function() {
+        queryGiphyAPI($(this).text(), defaultLimit);
+    });
+}
+
+function queryGiphyAPI(keyword, limit) {
+    // http://api.giphy.com/v1/gifs/search?q=ryan+gosling&api_key=YOUR_API_KEY&limit=5
+    $.getJSON(
+        "http://api.giphy.com/v1/gifs/search?q=" + (keyword.replace(" ", "+")) + "&limit=" + limit + "&api_key=" + GIPHY_API_KEY,
+        function (result) {
+            console.log(result);
+        }
+    );
 }
 
 $(function () {
