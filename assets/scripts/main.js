@@ -75,7 +75,7 @@ function setupListeners() {
 
 function queryGiphyAPI(keyword, limit) {
     $.getJSON(
-        "http://api.giphy.com/v1/gifs/search?q=" + (keyword.replace(" ", "+")) + "&limit=" + limit + "&api_key=" + GIPHY_API_KEY,
+        "//api.giphy.com/v1/gifs/search?q=" + (keyword.replace(" ", "+")) + "&limit=" + limit + "&api_key=" + GIPHY_API_KEY,
         function (result) {
             var data = result.data;
 
