@@ -1,4 +1,11 @@
+#topic-buttons {
+    margin-top: 10px;
+}
+#topic-buttons>button {
+    margin: 5px 5px;
+}
 .gif {
     display: inline-block;
     margin: 10px;
+    vertical-align: top;
 }
