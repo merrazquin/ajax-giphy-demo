@@ -75,7 +75,7 @@ function setupListeners() {
 
 function queryGiphyAPI(keyword, limit) {
     $.getJSON(
-        "//api.giphy.com/v1/gifs/search?q=" + (keyword.replace(" ", "+")) + "&limit=" + limit + "&api_key=" + GIPHY_API_KEY,
+        "https://api.giphy.com/v1/gifs/search?q=" + (keyword.replace(" ", "+")) + "&limit=" + limit + "&api_key=" + GIPHY_API_KEY,
         function (result) {
             var data = result.data;
 
@@ -85,20 +85,41 @@ function queryGiphyAPI(keyword, limit) {
             // add new GIFs
             data.forEach(giphyObj => {
                 $("#gifs")
+                    // panel container
                     .append($("<div>")
                         .addClass("gif panel panel-default")
                         .append(
+                            // image
                             $("<img>")
                                 .addClass("img-responsive")
                                 .attr("src", giphyObj.images.original_still.url)
                                 .attr("data-isStill", 1)
                                 .attr("data-stillURL", giphyObj.images.original_still.url)
                                 .attr("data-animatedURL", giphyObj.images.original.url),
+                            // footer
                             $("<div>")
                                 .addClass("panel-footer")
-                                .html('<a href="' + giphyObj.images.original.url + '" download="your-gif.gif">Download</a>')
-                            // .html('<a href="'+giphyObj.images.original.url+'" download="'+giphyObj.title.replace(" ", "_")+'.gif">Download</a>')
-                            // .text("Rating: " + (giphyObj.rating || "Not rated").toUpperCase())
+                                .append(
+                                    $("<div>")
+                                        .addClass("row")
+                                        .append(
+                                            // rating
+                                            $("<span>")
+                                                .addClass("col-xs-6 text-left")
+                                                .text("Rating: " + (giphyObj.rating || "Not rated").toUpperCase()),
+                                            // download button
+                                            $("<span>")
+                                                .addClass("col-xs-6 text-right")
+                                                .append(
+                                                    $("<a>")
+                                                        .attr("href", giphyObj.images.original.url)
+                                                        .attr("download", giphyObj.title.replace(" ", "_"))
+                                                        .html('<span class="glyphicon glyphicon-download-alt" aria-hidden="true"></span>')
+                                                )
+
+
+                                        )
+                                )
                         ));
             });
         }
