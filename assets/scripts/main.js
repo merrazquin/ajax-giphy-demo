@@ -42,30 +42,70 @@ const GIPHY_API_KEY = "3p7b4CMXTX8JPnjVpCpn9CM7uDYuPNAe";
 var topics = ["pasta", "pizza", "sushi", "ramen"];
 var defaultLimit = 10;
 
+
 function setupTopicButtons() {
     topics.forEach(topic => {
-        $("#topic-buttons").append($("<button>").addClass("btn btn-default topic").text(topic));
-    });
-
-    $(".topic").click(function () {
-        queryGiphyAPI($(this).text(), defaultLimit);
+        $("#topic-buttons").append(
+            $("<button>")
+                .addClass("btn btn-default topic")
+                .text(topic)
+                .attr("data-name", topic)
+        );
     });
 }
 
+function setupListeners() {
+    $(document)
+        .on("click", ".img-thumbnail", toggleGIF)
+        .on("click", ".topic", topicClicked);
+}
+
 function queryGiphyAPI(keyword, limit) {
-    // http://api.giphy.com/v1/gifs/search?q=ryan+gosling&api_key=YOUR_API_KEY&limit=5
     $.getJSON(
         "http://api.giphy.com/v1/gifs/search?q=" + (keyword.replace(" ", "+")) + "&limit=" + limit + "&api_key=" + GIPHY_API_KEY,
         function (result) {
-            console.log(result);
             var data = result.data;
+
+            // empty display
+            $("#gifs").empty();
+
+            // add new GIFs
             data.forEach(giphyObj => {
-                $("#gifs").append($("<img>").attr("src", giphyObj.images.original.url));
+                $("#gifs").append(
+                    $("<img>")
+                        .addClass("img-thumbnail")
+                        .attr("src", giphyObj.images.original_still.url)
+                        .attr("data-isStill", 1)
+                        .attr("data-stillURL", giphyObj.images.original_still.url)
+                        .attr("data-animatedURL", giphyObj.images.original.url)
+                );
             });
         }
     );
 }
 
+function topicClicked() {
+    queryGiphyAPI($(this).attr("data-name"), defaultLimit);
+}
+
+function toggleGIF() {
+    // grab reference to clicked gif, and find out if it's currently still
+    var gif = $(this);
+    var isStill = Number(gif.attr("data-isStill"));
+
+    // swap the src URL based on current state
+    if (isStill) {
+        gif.attr("src", gif.attr("data-animatedURL"));
+    }
+    else {
+        gif.attr("src", gif.attr("data-stillURL"));
+    }
+
+    // toggle isStill property 
+    gif.attr("data-isStill", isStill ? 0 : 1);
+}
+
 $(function () {
     setupTopicButtons();
+    setupListeners();
 });
