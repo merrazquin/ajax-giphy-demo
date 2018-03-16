@@ -56,7 +56,7 @@ function setupTopicButtons() {
 
 function setupListeners() {
     $(document)
-        .on("click", ".img-thumbnail", toggleGIF)
+        .on("click", ".gif", toggleGIF)
         .on("click", ".topic", topicClicked);
 }
 
@@ -71,14 +71,20 @@ function queryGiphyAPI(keyword, limit) {
 
             // add new GIFs
             data.forEach(giphyObj => {
-                $("#gifs").append(
-                    $("<img>")
-                        .addClass("img-thumbnail")
-                        .attr("src", giphyObj.images.original_still.url)
-                        .attr("data-isStill", 1)
-                        .attr("data-stillURL", giphyObj.images.original_still.url)
-                        .attr("data-animatedURL", giphyObj.images.original.url)
-                );
+                $("#gifs")
+                    .append($("<div>")
+                        .addClass("gif panel panel-default")
+                        .append(
+                            $("<img>")
+                                .addClass("img-responsive")
+                                .attr("src", giphyObj.images.original_still.url)
+                                .attr("data-isStill", 1)
+                                .attr("data-stillURL", giphyObj.images.original_still.url)
+                                .attr("data-animatedURL", giphyObj.images.original.url),
+                            $("<div>")
+                                .addClass("panel-footer")
+                                .text("Rating: " + (giphyObj.rating || "Not rated"))
+                        ));
             });
         }
     );
@@ -90,7 +96,7 @@ function topicClicked() {
 
 function toggleGIF() {
     // grab reference to clicked gif, and find out if it's currently still
-    var gif = $(this);
+    var gif = $(this).find("img");
     var isStill = Number(gif.attr("data-isStill"));
 
     // swap the src URL based on current state
