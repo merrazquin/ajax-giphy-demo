@@ -77,7 +77,7 @@ function queryGiphyAPI(keyword, limit) {
     $.getJSON(
         "https://api.giphy.com/v1/gifs/search?q=" + (keyword.replace(" ", "+")) + "&limit=" + limit + "&api_key=" + GIPHY_API_KEY,
         function (result) {
-            var data = result.data;
+            let data = result.data;
 
             // empty display
             $("#gifs").empty();
@@ -104,19 +104,27 @@ function queryGiphyAPI(keyword, limit) {
                                         .addClass("row")
                                         .append(
                                             // rating
+                                            $("<h4>")
+                                                .addClass("col-xs-12 text-left")
+                                                .text(giphyObj.title)
+
+
+                                        ),
+                                    $("<div>")
+                                        .addClass("row")
+                                        .append(
                                             $("<span>")
-                                                .addClass("col-xs-6 text-left")
+                                                .addClass("col-xs-10")
                                                 .text("Rating: " + (giphyObj.rating || "Not rated").toUpperCase()),
                                             // download button
                                             $("<span>")
-                                                .addClass("col-xs-6 text-right")
+                                                .addClass("col-xs-2 text-right")
                                                 .append(
                                                     $("<a>")
                                                         .attr("href", giphyObj.images.original.url)
-                                                        .attr("download", giphyObj.title.replace(" ", "_"))
+                                                        .attr("download", "img.gif")
                                                         .html('<span class="glyphicon glyphicon-download-alt" aria-hidden="true"></span>')
                                                 )
-
 
                                         )
                                 )
@@ -132,8 +140,8 @@ function topicClicked() {
 
 function toggleGIF() {
     // grab reference to clicked gif, and find out if it's currently still
-    var gif = $(this).find("img");
-    var isStill = Number(gif.attr("data-isStill"));
+    let gif = $(this).find("img");
+    let isStill = Number(gif.attr("data-isStill"));
 
     // swap the src URL based on current state
     if (isStill) {
@@ -150,7 +158,7 @@ function toggleGIF() {
 function addFood(event) {
     // don't submit the form 
     event.preventDefault();
-    var topic = $("#food-type").val().trim();
+    let topic = $("#food-type").val().trim();
     $(".form-group").removeClass("has-error");
 
     // add the value of the input field to the topics array
