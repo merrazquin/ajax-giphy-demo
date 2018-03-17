@@ -1,14 +1,40 @@
 body {
     margin: 10px 20px;
 }
-#topic-buttons {
+
+form {
+    margin-bottom: 10px;
+}
+
+h4 {
+    margin-top: 0px;
+}
+
+#topic-buttons, .jumbotron {
     margin-top: 10px;
 }
+
 #topic-buttons>button {
     margin: 5px 5px;
 }
-.gif {
+
+.panel {
     display: inline-block;
     margin: 10px;
     vertical-align: top;
+}
+
+.fave {
+    color: grey;
+}
+.faved {
+    color: red;
+}
+
+.panel-faves {
+    margin-left: 0px;
+}
+
+#faves {
+    display:none;
 }

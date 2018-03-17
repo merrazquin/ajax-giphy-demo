@@ -51,7 +51,7 @@ const GIPHY_API_KEY = "3p7b4CMXTX8JPnjVpCpn9CM7uDYuPNAe";
 
 var topics = ["pasta", "pizza", "sushi", "ramen"];
 var defaultLimit = 10;
-
+var favesHidden = true;
 
 function setupTopicButtons() {
     $("#topic-buttons").empty();
@@ -70,7 +70,10 @@ function setupListeners() {
     $(document)
         .on("click", ".topic", topicClicked)// when topic buttons are clicked, load associated GIFs
         .on("click", ".gif", toggleGIF)     // when GIFs are clicked, toggle back & forth between still & animated
-        .on("click", "#add-food", addFood); // when add food button is clicked, add a new topic button
+        .on("click", "#add-food", addFood)  // when add food button is clicked, add a new topic button
+        .on("click", ".fave", toggleFavorite)  // when fave button is clicked, toggle the item's favorite status
+        .on("click", "#faves-heading", toggleFavoritesPanel) // toggle the favorites panel when clicked
+        ;
 }
 
 function queryGiphyAPI(keyword, limit) {
@@ -87,11 +90,11 @@ function queryGiphyAPI(keyword, limit) {
                 $("#gifs")
                     // panel container
                     .append($("<div>")
-                        .addClass("gif panel panel-default")
+                        .addClass("gif-panel panel panel-default")
                         .append(
                             // image
                             $("<img>")
-                                .addClass("img-responsive")
+                                .addClass("gif img-responsive")
                                 .attr("src", giphyObj.images.original_still.url)
                                 .attr("data-isStill", 1)
                                 .attr("data-stillURL", giphyObj.images.original_still.url)
@@ -103,16 +106,24 @@ function queryGiphyAPI(keyword, limit) {
                                     $("<div>")
                                         .addClass("row")
                                         .append(
-                                            // rating
+                                            // GIF title
                                             $("<h4>")
-                                                .addClass("col-xs-12 text-left")
-                                                .text(giphyObj.title)
-
+                                                .addClass("col-xs-10 text-left")
+                                                .text(giphyObj.title),
+                                            // favorite button
+                                            $("<span>")
+                                                .addClass("col-xs-2 text-right")
+                                                .append(
+                                                    $("<span>")
+                                                        .addClass("fave glyphicon glyphicon-heart")
+                                                        .attr("aria-hidden", "true")
+                                                )
 
                                         ),
                                     $("<div>")
                                         .addClass("row")
                                         .append(
+                                            // rating
                                             $("<span>")
                                                 .addClass("col-xs-10")
                                                 .text("Rating: " + (giphyObj.rating || "Not rated").toUpperCase()),
@@ -120,12 +131,12 @@ function queryGiphyAPI(keyword, limit) {
                                             $("<span>")
                                                 .addClass("col-xs-2 text-right")
                                                 .append(
+
                                                     $("<a>")
                                                         .attr("href", giphyObj.images.original.url)
                                                         .attr("download", "img.gif")
                                                         .html('<span class="glyphicon glyphicon-download-alt" aria-hidden="true"></span>')
                                                 )
-
                                         )
                                 )
                         ));
@@ -140,7 +151,7 @@ function topicClicked() {
 
 function toggleGIF() {
     // grab reference to clicked gif, and find out if it's currently still
-    let gif = $(this).find("img");
+    let gif = $(this)
     let isStill = Number(gif.attr("data-isStill"));
 
     // swap the src URL based on current state
@@ -158,7 +169,17 @@ function toggleGIF() {
 function addFood(event) {
     // don't submit the form 
     event.preventDefault();
+
     let topic = $("#food-type").val().trim();
+
+    // if the input is empty, show an error
+    if (!topic) {
+        $(".form-group").addClass("has-error");
+        $("#food-type").attr("placeholder", "required");
+        return;
+    }
+
+    $("#food-type").attr("placeholder", "i.e. cereal");
     $(".form-group").removeClass("has-error");
 
     // add the value of the input field to the topics array
@@ -201,6 +222,49 @@ function addFood(event) {
             $(".form-group").addClass("has-error");
         }
     });
+}
+
+function toggleFavoritesPanel() {
+    var toggleButton = $("#faves-toggle");
+
+    // check the glyphicon being used to determine the current state
+    if (favesHidden) {
+        toggleButton.removeClass("glyphicon-collapse-down");
+        toggleButton.addClass("glyphicon-collapse-up");
+    }
+    else {
+        toggleButton.removeClass("glyphicon-collapse-up");
+        toggleButton.addClass("glyphicon-collapse-down");
+    }
+
+    // toggle the flag, and show or hide the faves panel body
+    favesHidden = !favesHidden;
+    favesHidden ? $("#faves").hide() : $("#faves").show();
+}
+
+function toggleFavorite() {
+    // if this is the first favorite being added, and the faves panel is closed, open it
+    if (!$("#faves").children(".gif-panel").length && favesHidden) {
+        toggleFavoritesPanel();
+    }
+
+    var panel = $(this).parents(".gif-panel");
+    if ($(this).hasClass("faved")) {
+        // remove the panel
+        panel.remove();
+
+        // if this is the last favorite removed, and the faves panel is open, close it
+        if (!$("#faves").children(".gif-panel").length && !favesHidden) {
+            toggleFavoritesPanel();
+        }
+    }
+    else {
+        // add the faved class
+        $(this).addClass("faved");
+
+        // move the GIF panel to the faves panel
+        $("#faves").prepend(panel);
+    }
 }
 
 $(function () {
