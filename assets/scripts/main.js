@@ -74,7 +74,7 @@ function setupFavorites() {
         $("#faves").append(createGIFPanel(faveKey, storedFave.title, storedFave.rating, storedFave.stillURL, storedFave.animatedURL, true));
     }
 
-    if($("#faves").children(".gif-panel").length && favesHidden) {
+    if ($("#faves").children(".gif-panel").length && favesHidden) {
         toggleFavoritesPanel();
     }
 }
@@ -100,9 +100,11 @@ function queryGiphyAPI(keyword, limit) {
 
             // add new GIFs
             data.forEach(giphyObj => {
-                $("#gifs")
-                    // panel container
-                    .append(createGIFPanel(giphyObj.id, giphyObj.title, giphyObj.rating, giphyObj.images.original_still.url, giphyObj.images.original.url));
+                // if the GIF isn't already stored in the favorites, add it
+                if (!storedFaves[giphyObj.id]) {
+                    $("#gifs")
+                        .append(createGIFPanel(giphyObj.id, giphyObj.title, giphyObj.rating, giphyObj.images.original_still.url, giphyObj.images.original.url));
+                }
             });
         }
     );
