@@ -38,7 +38,7 @@
 */
 
 /*
-API Base URL	https://od-api.oxforddictionaries.com/api/v1
+Dictionary API Base URL	https://od-api.oxforddictionaries.com/api/v1
 Consistent part of API requests.
 
 Application ID	f48de7a0
@@ -52,6 +52,7 @@ const GIPHY_API_KEY = "3p7b4CMXTX8JPnjVpCpn9CM7uDYuPNAe";
 var topics = ["pasta", "pizza", "sushi", "ramen"];
 var defaultLimit = 10;
 var favesHidden = true;
+var storedFaves = JSON.parse(localStorage.getItem("favorites")) || {};
 
 function setupTopicButtons() {
     $("#topic-buttons").empty();
@@ -64,6 +65,18 @@ function setupTopicButtons() {
                 .attr("data-name", topic)
         );
     });
+}
+
+function setupFavorites() {
+    // populate any existing favorites from local storage
+    for (var faveKey in storedFaves) {
+        var storedFave = storedFaves[faveKey];
+        $("#faves").append(createGIFPanel(faveKey, storedFave.title, storedFave.rating, storedFave.stillURL, storedFave.animatedURL, true));
+    }
+
+    if($("#faves").children(".gif-panel").length && favesHidden) {
+        toggleFavoritesPanel();
+    }
 }
 
 function setupListeners() {
@@ -89,60 +102,66 @@ function queryGiphyAPI(keyword, limit) {
             data.forEach(giphyObj => {
                 $("#gifs")
                     // panel container
-                    .append($("<div>")
-                        .addClass("gif-panel panel panel-default")
-                        .append(
-                            // image
-                            $("<img>")
-                                .addClass("gif img-responsive")
-                                .attr("src", giphyObj.images.original_still.url)
-                                .attr("data-isStill", 1)
-                                .attr("data-stillURL", giphyObj.images.original_still.url)
-                                .attr("data-animatedURL", giphyObj.images.original.url),
-                            // footer
-                            $("<div>")
-                                .addClass("panel-footer")
-                                .append(
-                                    $("<div>")
-                                        .addClass("row")
-                                        .append(
-                                            // GIF title
-                                            $("<h4>")
-                                                .addClass("col-xs-10 text-left")
-                                                .text(giphyObj.title),
-                                            // favorite button
-                                            $("<span>")
-                                                .addClass("col-xs-2 text-right")
-                                                .append(
-                                                    $("<span>")
-                                                        .addClass("fave glyphicon glyphicon-heart")
-                                                        .attr("aria-hidden", "true")
-                                                )
-
-                                        ),
-                                    $("<div>")
-                                        .addClass("row")
-                                        .append(
-                                            // rating
-                                            $("<span>")
-                                                .addClass("col-xs-10")
-                                                .text("Rating: " + (giphyObj.rating || "Not rated").toUpperCase()),
-                                            // download button
-                                            $("<span>")
-                                                .addClass("col-xs-2 text-right")
-                                                .append(
-
-                                                    $("<a>")
-                                                        .attr("href", giphyObj.images.original.url)
-                                                        .attr("download", "img.gif")
-                                                        .html('<span class="glyphicon glyphicon-download-alt" aria-hidden="true"></span>')
-                                                )
-                                        )
-                                )
-                        ));
+                    .append(createGIFPanel(giphyObj.id, giphyObj.title, giphyObj.rating, giphyObj.images.original_still.url, giphyObj.images.original.url));
             });
         }
     );
+}
+
+// creates the entire GIF panel
+function createGIFPanel(id, title, rating, stillURL, animatedURL, faved) {
+    return $("<div>")
+        .addClass("gif-panel panel panel-default")
+        .data({ id: id, title: title, rating: rating, stillURL: stillURL, animatedURL: animatedURL })
+        .append(
+            // image
+            $("<img>")
+                .addClass("gif img-responsive")
+                .attr("src", stillURL)
+                .attr("data-isStill", 1)
+                .attr("data-stillURL", stillURL)
+                .attr("data-animatedURL", animatedURL),
+            // footer
+            $("<div>")
+                .addClass("panel-footer")
+                .append(
+                    $("<div>")
+                        .addClass("row")
+                        .append(
+                            // GIF title
+                            $("<h4>")
+                                .addClass("col-xs-10 text-left")
+                                .text(title),
+                            // favorite button
+                            $("<span>")
+                                .addClass("col-xs-2 text-right")
+                                .append(
+                                    $("<span>")
+                                        .addClass("fave glyphicon glyphicon-heart" + (faved ? " faved" : ""))
+                                        .attr("aria-hidden", "true")
+                                )
+
+                        ),
+                    $("<div>")
+                        .addClass("row")
+                        .append(
+                            // rating
+                            $("<span>")
+                                .addClass("col-xs-10")
+                                .text("Rating: " + rating.toUpperCase()),
+                            // download button
+                            $("<span>")
+                                .addClass("col-xs-2 text-right")
+                                .append(
+
+                                    $("<a>")
+                                        .attr("href", animatedURL)
+                                        .attr("download", "img.gif")
+                                        .html('<span class="glyphicon glyphicon-download-alt" aria-hidden="true"></span>')
+                                )
+                        )
+                )
+        );
 }
 
 function topicClicked() {
@@ -250,6 +269,9 @@ function toggleFavorite() {
 
     var panel = $(this).parents(".gif-panel");
     if ($(this).hasClass("faved")) {
+        // remove it from the stored favorites
+        delete storedFaves[panel.data().id];
+
         // remove the panel
         panel.remove();
 
@@ -264,10 +286,16 @@ function toggleFavorite() {
 
         // move the GIF panel to the faves panel
         $("#faves").prepend(panel);
+
+        // add it to the stored favorites
+        storedFaves[panel.data().id] = panel.data();
     }
+
+    localStorage.setItem("favorites", JSON.stringify(storedFaves));
 }
 
 $(function () {
     setupTopicButtons();
+    setupFavorites()
     setupListeners();
 });
