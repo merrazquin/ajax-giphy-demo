@@ -53,7 +53,8 @@ Application Keys	d5e1c50a800e688df04be58ed34388ff
 const GIPHY_API_KEY = "3p7b4CMXTX8JPnjVpCpn9CM7uDYuPNAe";
 
 var rating = "g";
-var topics = JSON.parse(localStorage.getItem("topics")) || ["pasta", "pizza", "sushi", "ramen"];
+var defaultTopics = ["pasta", "boba tea", "sushi", "ramen"];
+var topics = JSON.parse(localStorage.getItem("topics")) || defaultTopics.slice();
 var defaultLimit = 10;
 var favesHidden = true;
 var storedFaves = JSON.parse(localStorage.getItem("favorites")) || {};
@@ -68,29 +69,41 @@ function setupTopicButtons() {
         $("#topic-buttons").append(
 
             $("<button>")
-                .addClass("btn btn-default topic")
+                .addClass("btn btn-default topic" + (defaultTopics.indexOf(topic) == -1 ? " btn-warning" : ""))
                 .text(topic)
                 .attr("data-name", topic)
         );
     });
+
+    // store the topics in local storage
+    localStorage.setItem("topics", JSON.stringify(topics));
+
+    updateClearButtonVisibility();
 }
 
 /**
  * Populate the favorites panel with any existing favorites (stored locally)
  */
 function setupFavorites() {
+    $("#faves").empty();
 
     // populate any existing favorites from local storage
-    for (var faveKey in storedFaves) {
-        var storedFave = storedFaves[faveKey];
+    for (let faveKey in storedFaves) {
+        let storedFave = storedFaves[faveKey];
         $("#faves").append(createGIFPanel(faveKey, storedFave.title, storedFave.rating, storedFave.stillURL, storedFave.animatedURL, storedFave.maxWidth, true));
     }
 
-    if ($("#faves").children(".gif-panel").length && favesHidden) {
+    let numFaves = Object.keys(storedFaves).length;
+    if (numFaves && favesHidden) {
+        toggleFavoritesPanel();
+    }
+
+    if (!numFaves && !favesHidden) {
         toggleFavoritesPanel();
     }
 
     updateFavesHeader();
+    updateClearButtonVisibility();
 }
 
 /**
@@ -103,7 +116,8 @@ function setupListeners() {
         .on("click", "#add-food", addFood)  // when add food button is clicked, add a new topic button
         .on("click", ".fave", toggleFavorite)  // when fave button is clicked, toggle the item's favorite status
         .on("click", "#faves-heading", toggleFavoritesPanel) // toggle the favorites panel when clicked
-        .on("click", ".dropdown-menu a", updateRating)
+        .on("click", ".dropdown-menu a", updateRating) // change the max allowed rating
+        .on("click", "#clear-data", clearUserData)  // when clear button is clicked, clear all locally stored data
         ;
 }
 
@@ -239,12 +253,19 @@ function addFood(event) {
     // don't submit the form 
     event.preventDefault();
 
-    let topic = $("#food-type").val().trim();
+    let topic = $("#food-type").val().toLowerCase().trim();
 
     // if the input is empty, show an error and return
     if (!topic) {
         $(".form-group").addClass("has-error");
         $("#food-type").attr("placeholder", "required");
+        return;
+    }
+
+    if (topics.indexOf(topic) != -1) {
+        $(".form-group").addClass("has-error");
+        $("#food-type").val("");
+        $("#food-type").attr("placeholder", "already in use");
         return;
     }
 
@@ -258,9 +279,6 @@ function addFood(event) {
 
     // re-generate the buttons
     setupTopicButtons();
-
-    // store the topics in local storage
-    localStorage.setItem("topics", JSON.stringify(topics));
 
     return; // skipping validation until a more reliable API can be found
 
@@ -299,7 +317,7 @@ function addFood(event) {
  * Open and close the favorites panel
  */
 function toggleFavoritesPanel() {
-    var toggleButton = $("#faves-toggle");
+    let toggleButton = $("#faves-toggle");
 
     // check the glyphicon being used to determine the current state
     if (favesHidden) {
@@ -321,11 +339,11 @@ function toggleFavoritesPanel() {
  */
 function toggleFavorite() {
     // if this is the first favorite being added, and the faves panel is closed, open it
-    if (!$("#faves").children(".gif-panel").length && favesHidden) {
+    if (!Object.keys(storedFaves).length && favesHidden) {
         toggleFavoritesPanel();
     }
 
-    var panel = $(this).parents(".gif-panel");
+    let panel = $(this).parents(".gif-panel");
     if ($(this).hasClass("faved")) {
         // remove it from the stored favorites
         delete storedFaves[panel.data().id];
@@ -334,7 +352,7 @@ function toggleFavorite() {
         panel.remove();
 
         // if this is the last favorite removed, and the faves panel is open, close it
-        if (!$("#faves").children(".gif-panel").length && !favesHidden) {
+        if (!Object.keys(storedFaves).length && !favesHidden) {
             toggleFavoritesPanel();
         }
     }
@@ -349,15 +367,29 @@ function toggleFavorite() {
         storedFaves[panel.data().id] = panel.data();
     }
 
+    // update local storage, fave count in header, and clear button visibility 
     localStorage.setItem("favorites", JSON.stringify(storedFaves));
     updateFavesHeader();
+    updateClearButtonVisibility();
 }
 
 /**
  * Update the heading with the current number of favorited GIFs
  */
 function updateFavesHeader() {
-    $("#faves-heading h3").text("Favorites (" + $("#faves").children(".gif-panel").length + ")");
+    $("#faves-heading h3").text("Favorites (" + Object.keys(storedFaves).length + ")");
+}
+
+/**
+ * Show or hide the clear user data button depending on local storage contents
+ */
+function updateClearButtonVisibility() {
+    if (!Object.keys(storedFaves).length && topics.length == defaultTopics.length) {
+        $("#clear-data").hide();
+    }
+    else {
+        $("#clear-data").show();
+    }
 }
 
 /**
@@ -365,6 +397,17 @@ function updateFavesHeader() {
  */
 function updateRating() {
     $("#rating-label").text((rating = $(this).attr("data-rating")).toUpperCase());
+}
+
+/**
+ * Clear out all locally stored data
+ */
+function clearUserData() {
+    localStorage.clear();
+    topics = defaultTopics.slice();
+    storedFaves = {};
+    setupTopicButtons();
+    setupFavorites();
 }
 
 /**

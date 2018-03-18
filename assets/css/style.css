@@ -27,6 +27,7 @@ h4 {
 .fave {
     color: grey;
 }
+
 .faved {
     color: red;
 }
@@ -37,5 +38,21 @@ h4 {
 }
 
 #faves {
-    display:none;
+    display: none;
+}
+
+@media screen and (min-width: 991px) {
+    #clear-data {
+        opacity: .5;
+        position: fixed;
+        z-index: 999;
+        top: 10px;
+        right: 0px;
+    }
+    #clear-data:hover {
+        opacity: 1;
+    }
+    #clear-data:hover span::after {
+        content: " - Clear user data";
+    }
 }
