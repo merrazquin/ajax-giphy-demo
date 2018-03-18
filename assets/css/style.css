@@ -41,6 +41,7 @@ h4 {
     display: none;
 }
 
+
 @media screen and (min-width: 991px) {
     #clear-data {
         opacity: .5;

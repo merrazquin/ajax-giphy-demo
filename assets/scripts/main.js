@@ -55,7 +55,9 @@ const GIPHY_API_KEY = "3p7b4CMXTX8JPnjVpCpn9CM7uDYuPNAe";
 var rating = "g";
 var defaultTopics = ["pasta", "boba tea", "sushi", "ramen"];
 var topics = JSON.parse(localStorage.getItem("topics")) || defaultTopics.slice();
+var currentTopic = "";
 var defaultLimit = 10;
+var limitOffset = 0;
 var favesHidden = true;
 var storedFaves = JSON.parse(localStorage.getItem("favorites")) || {};
 
@@ -125,15 +127,22 @@ function setupListeners() {
  * Query the Giphy API
  * @param {string} keyword 
  * @param {number} limit 
+ * @param {number} offset
  */
-function queryGiphyAPI(keyword, limit) {
+function queryGiphyAPI(keyword, limit, offset) {
     $.getJSON(
-        "https://api.giphy.com/v1/gifs/search?q=" + (keyword.replace(" ", "+")) + "&limit=" + limit + "&api_key=" + GIPHY_API_KEY + "&rating=" + rating,
+        "https://api.giphy.com/v1/gifs/search?q=" + (keyword.replace(" ", "+")) +
+        "&limit=" + limit + "&offset=" + offset +
+        "&rating=" + rating +
+        "&api_key=" + GIPHY_API_KEY,
+
         function (result) {
             let data = result.data;
 
-            // empty display
-            $("#gifs").empty();
+            // empty display only if this is the first set of results
+            if (!offset) {
+                $("#gifs").empty();
+            }
 
             // if the data is empty, display a message
             if (!data.length) {
@@ -145,7 +154,7 @@ function queryGiphyAPI(keyword, limit) {
                 // if the GIF isn't already stored in the favorites, add it
                 if (!storedFaves[giphyObj.id]) {
                     $("#gifs")
-                        .append(createGIFPanel(giphyObj.id, giphyObj.title, giphyObj.rating, giphyObj.images.fixed_height_still.url, giphyObj.images.fixed_height_downsampled.url, giphyObj.images.fixed_height.width));
+                        .prepend(createGIFPanel(giphyObj.id, giphyObj.title, giphyObj.rating, giphyObj.images.fixed_height_still.url, giphyObj.images.fixed_height_downsampled.url, giphyObj.images.fixed_height.width));
                 }
             });
         }
@@ -222,7 +231,16 @@ function createGIFPanel(id, title, rating, stillURL, animatedURL, maxWidth, fave
  * When topic buton is clicked, queryGiphyAPI is called with the selected topic & default limit
  */
 function topicClicked() {
-    queryGiphyAPI($(this).attr("data-name"), defaultLimit);
+    var newTopic = $(this).attr("data-name");
+
+    if (newTopic != currentTopic) {
+        limitOffset = 0;
+    } else {
+        limitOffset += defaultLimit;
+    }
+
+    currentTopic = newTopic;
+    queryGiphyAPI(newTopic, defaultLimit, limitOffset);
 }
 
 /**
@@ -406,6 +424,7 @@ function clearUserData() {
     localStorage.clear();
     topics = defaultTopics.slice();
     storedFaves = {};
+
     setupTopicButtons();
     setupFavorites();
 }
