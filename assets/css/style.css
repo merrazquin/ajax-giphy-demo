@@ -25,11 +25,16 @@ h4 {
 }
 
 .fave {
+    cursor: pointer;
     color: grey;
 }
 
 .faved {
     color: red;
+}
+
+#faves-heading {
+    cursor: pointer;
 }
 
 .panel-faves, .panel-form {
@@ -40,7 +45,6 @@ h4 {
 #faves {
     display: none;
 }
-
 
 @media screen and (min-width: 991px) {
     #clear-data {
