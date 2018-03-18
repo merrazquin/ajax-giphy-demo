@@ -83,7 +83,7 @@ function setupFavorites() {
     // populate any existing favorites from local storage
     for (var faveKey in storedFaves) {
         var storedFave = storedFaves[faveKey];
-        $("#faves").append(createGIFPanel(faveKey, storedFave.title, storedFave.rating, storedFave.stillURL, storedFave.animatedURL, true));
+        $("#faves").append(createGIFPanel(faveKey, storedFave.title, storedFave.rating, storedFave.stillURL, storedFave.animatedURL, storedFave.maxWidth, true));
     }
 
     if ($("#faves").children(".gif-panel").length && favesHidden) {
@@ -121,12 +121,17 @@ function queryGiphyAPI(keyword, limit) {
             // empty display
             $("#gifs").empty();
 
+            // if the data is empty, display a message
+            if (!data.length) {
+                $("#gifs").html("<h3>No results found (try changing the Rating)</h3>");
+            }
+
             // add new GIFs
             data.forEach(giphyObj => {
                 // if the GIF isn't already stored in the favorites, add it
                 if (!storedFaves[giphyObj.id]) {
                     $("#gifs")
-                        .append(createGIFPanel(giphyObj.id, giphyObj.title, giphyObj.rating, giphyObj.images.original_still.url, giphyObj.images.original.url));
+                        .append(createGIFPanel(giphyObj.id, giphyObj.title, giphyObj.rating, giphyObj.images.fixed_height_still.url, giphyObj.images.fixed_height_downsampled.url, giphyObj.images.fixed_height.width));
                 }
             });
         }
@@ -140,12 +145,14 @@ function queryGiphyAPI(keyword, limit) {
  * @param {string} rating y, g, pg, pg-13, r
  * @param {string} stillURL 
  * @param {string} animatedURL 
+ * @param {number} maxWidth
  * @param {boolean} faved 
  */
-function createGIFPanel(id, title, rating, stillURL, animatedURL, faved) {
+function createGIFPanel(id, title, rating, stillURL, animatedURL, maxWidth, faved) {
     return $("<div>")
         .addClass("gif-panel panel panel-default")
-        .data({ id: id, title: title, rating: rating, stillURL: stillURL, animatedURL: animatedURL })
+        .css("max-width", maxWidth + "px")
+        .data({ id: id, title: title, rating: rating, stillURL: stillURL, animatedURL: animatedURL, maxWidth: maxWidth })
         .append(
             // image
             $("<img>")

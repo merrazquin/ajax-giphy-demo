@@ -53,18 +53,24 @@
         </div>
         <div class="row">
             <div class="col-sm-2 col-sm-push-10">
-                <form>
-                    <div class="form-group">
-                        <label for="food-type">Add a food:</label>
-                        <input type="text" class="form-control" id="food-type" placeholder="i.e. cereal">
+                <div class="panel panel-default panel-form">
+                    <div class="panel-heading">
+                        <h3 class="panel-title">Add a food:</h3>
                     </div>
-                    <button id="add-food" type="submit" class="btn btn-default">Submit</button>
-                </form>
+                    <div class="panel-body">
+                        <form>
+                            <div class="form-group">
+                                <input type="text" class="form-control" id="food-type" placeholder="i.e. cereal">
+                            </div>
+                            <button id="add-food" type="submit" class="btn btn-default">Submit</button>
+                        </form>
+                    </div>
+                </div>
             </div>
             <div class="col-sm-10 col-sm-pull-2">
                 <div class="row">
                     <div class="col-xs-12">
-                        <div class="panel panel-default panel-faves" style="width:100%">
+                        <div class="panel panel-default panel-faves">
                             <div id="faves-heading" class="panel-heading">
                                 <div class="row">
                                     <h3 class="panel-title col-xs-10">Faves</h3>
