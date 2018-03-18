@@ -38,6 +38,9 @@
 */
 
 /*
+
+For possible future validation:
+
 Dictionary API Base URL	https://od-api.oxforddictionaries.com/api/v1
 Consistent part of API requests.
 
@@ -49,16 +52,21 @@ Application Keys	d5e1c50a800e688df04be58ed34388ff
 
 const GIPHY_API_KEY = "3p7b4CMXTX8JPnjVpCpn9CM7uDYuPNAe";
 
-var topics = ["pasta", "pizza", "sushi", "ramen"];
+var rating = "g";
+var topics = JSON.parse(localStorage.getItem("topics")) || ["pasta", "pizza", "sushi", "ramen"];
 var defaultLimit = 10;
 var favesHidden = true;
 var storedFaves = JSON.parse(localStorage.getItem("favorites")) || {};
 
+/**
+ * Displays a button for each topic
+ */
 function setupTopicButtons() {
     $("#topic-buttons").empty();
 
     topics.forEach(topic => {
         $("#topic-buttons").append(
+
             $("<button>")
                 .addClass("btn btn-default topic")
                 .text(topic)
@@ -67,7 +75,11 @@ function setupTopicButtons() {
     });
 }
 
+/**
+ * Populate the favorites panel with any existing favorites (stored locally)
+ */
 function setupFavorites() {
+
     // populate any existing favorites from local storage
     for (var faveKey in storedFaves) {
         var storedFave = storedFaves[faveKey];
@@ -77,8 +89,13 @@ function setupFavorites() {
     if ($("#faves").children(".gif-panel").length && favesHidden) {
         toggleFavoritesPanel();
     }
+
+    updateFavesHeader();
 }
 
+/**
+ * Bind listeners to clickable elements
+ */
 function setupListeners() {
     $(document)
         .on("click", ".topic", topicClicked)// when topic buttons are clicked, load associated GIFs
@@ -86,12 +103,18 @@ function setupListeners() {
         .on("click", "#add-food", addFood)  // when add food button is clicked, add a new topic button
         .on("click", ".fave", toggleFavorite)  // when fave button is clicked, toggle the item's favorite status
         .on("click", "#faves-heading", toggleFavoritesPanel) // toggle the favorites panel when clicked
+        .on("click", ".dropdown-menu a", updateRating)
         ;
 }
 
+/**
+ * Query the Giphy API
+ * @param {string} keyword 
+ * @param {number} limit 
+ */
 function queryGiphyAPI(keyword, limit) {
     $.getJSON(
-        "https://api.giphy.com/v1/gifs/search?q=" + (keyword.replace(" ", "+")) + "&limit=" + limit + "&api_key=" + GIPHY_API_KEY,
+        "https://api.giphy.com/v1/gifs/search?q=" + (keyword.replace(" ", "+")) + "&limit=" + limit + "&api_key=" + GIPHY_API_KEY + "&rating=" + rating,
         function (result) {
             let data = result.data;
 
@@ -110,7 +133,15 @@ function queryGiphyAPI(keyword, limit) {
     );
 }
 
-// creates the entire GIF panel
+/**
+ * Creates the entire GIF Panel for displaying a GIF with its title, rating, and buttons for favorite/download
+ * @param {string} id GIPHY API ID
+ * @param {string} title 
+ * @param {string} rating y, g, pg, pg-13, r
+ * @param {string} stillURL 
+ * @param {string} animatedURL 
+ * @param {boolean} faved 
+ */
 function createGIFPanel(id, title, rating, stillURL, animatedURL, faved) {
     return $("<div>")
         .addClass("gif-panel panel panel-default")
@@ -119,6 +150,7 @@ function createGIFPanel(id, title, rating, stillURL, animatedURL, faved) {
             // image
             $("<img>")
                 .addClass("gif img-responsive")
+                .attr("alt", "GIF: " + title)
                 .attr("src", stillURL)
                 .attr("data-isStill", 1)
                 .attr("data-stillURL", stillURL)
@@ -140,9 +172,9 @@ function createGIFPanel(id, title, rating, stillURL, animatedURL, faved) {
                                 .append(
                                     $("<span>")
                                         .addClass("fave glyphicon glyphicon-heart" + (faved ? " faved" : ""))
-                                        .attr("aria-hidden", "true")
+                                        .attr("aria-hidden", "true"),
+                                    $('<span class="sr-only">Favorite</span>')
                                 )
-
                         ),
                     $("<div>")
                         .addClass("row")
@@ -155,21 +187,26 @@ function createGIFPanel(id, title, rating, stillURL, animatedURL, faved) {
                             $("<span>")
                                 .addClass("col-xs-2 text-right")
                                 .append(
-
                                     $("<a>")
                                         .attr("href", animatedURL)
                                         .attr("download", "img.gif")
-                                        .html('<span class="glyphicon glyphicon-download-alt" aria-hidden="true"></span>')
+                                        .html('<span class="glyphicon glyphicon-download-alt" aria-hidden="true"></span><span class="sr-only">Download</span>')
                                 )
                         )
                 )
         );
 }
 
+/**
+ * When topic buton is clicked, queryGiphyAPI is called with the selected topic & default limit
+ */
 function topicClicked() {
     queryGiphyAPI($(this).attr("data-name"), defaultLimit);
 }
 
+/**
+ * When a GIF is clicked, toggle between still & animated
+ */
 function toggleGIF() {
     // grab reference to clicked gif, and find out if it's currently still
     let gif = $(this)
@@ -187,32 +224,38 @@ function toggleGIF() {
     gif.attr("data-isStill", isStill ? 0 : 1);
 }
 
+/**
+ * When the add food button is clicked, add a new topic button
+ * @param {object} event 
+ */
 function addFood(event) {
     // don't submit the form 
     event.preventDefault();
 
     let topic = $("#food-type").val().trim();
 
-    // if the input is empty, show an error
+    // if the input is empty, show an error and return
     if (!topic) {
         $(".form-group").addClass("has-error");
         $("#food-type").attr("placeholder", "required");
         return;
     }
 
-    $("#food-type").attr("placeholder", "i.e. cereal");
-    $(".form-group").removeClass("has-error");
-
     // add the value of the input field to the topics array
     topics.push(topic);
-    // clear out the input field
+
+    // reset the form input
+    $("#food-type").attr("placeholder", "i.e. cereal");
+    $(".form-group").removeClass("has-error");
     $("#food-type").val("");
 
     // re-generate the buttons
     setupTopicButtons();
 
+    // store the topics in local storage
+    localStorage.setItem("topics", JSON.stringify(topics));
 
-    return; // don't validate
+    return; // skipping validation until a more reliable API can be found
 
     // unused validation code
     $.ajax({
@@ -245,6 +288,9 @@ function addFood(event) {
     });
 }
 
+/**
+ * Open and close the favorites panel
+ */
 function toggleFavoritesPanel() {
     var toggleButton = $("#faves-toggle");
 
@@ -263,6 +309,9 @@ function toggleFavoritesPanel() {
     favesHidden ? $("#faves").hide() : $("#faves").show();
 }
 
+/**
+ * Update a GIF's "favorite" status
+ */
 function toggleFavorite() {
     // if this is the first favorite being added, and the faves panel is closed, open it
     if (!$("#faves").children(".gif-panel").length && favesHidden) {
@@ -294,8 +343,26 @@ function toggleFavorite() {
     }
 
     localStorage.setItem("favorites", JSON.stringify(storedFaves));
+    updateFavesHeader();
 }
 
+/**
+ * Update the heading with the current number of favorited GIFs
+ */
+function updateFavesHeader() {
+    $("#faves-heading h3").text("Favorites (" + $("#faves").children(".gif-panel").length + ")");
+}
+
+/**
+ * Update the rating based on dropdown selection
+ */
+function updateRating() {
+    $("#rating-label").text((rating = $(this).attr("data-rating")).toUpperCase());
+}
+
+/**
+ * On ready, call setup functions
+ */
 $(function () {
     setupTopicButtons();
     setupFavorites()

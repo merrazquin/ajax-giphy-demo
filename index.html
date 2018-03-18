@@ -21,6 +21,34 @@
             <h1 class="col-xs-12">Giphy AJAX Demo</h1>
         </div>
         <div class="row">
+            <div class="col-xs-12">
+                Rating:
+                <div class="btn-group">
+                    <button type="button" class="btn btn-default dropdown-toggle" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+                        <span id="rating-label">G</span>
+                        <span class="caret"></span>
+                    </button>
+                    <ul class="dropdown-menu">
+                        <li>
+                            <a href="#" data-rating="y">Y</a>
+                        </li>
+                        <li>
+                            <a href="#" data-rating="g">G</a>
+                        </li>
+                        <li>
+                            <a href="#" data-rating="pg">PG</a>
+                        </li>
+                        <li>
+                            <a href="#" data-rating="pg-13">PG-13</a>
+                        </li>
+                        <li>
+                            <a href="#" data-rating="r">R</a>
+                        </li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+        <div class="row">
             <div id="topic-buttons" class="col-xs-12"></div>
         </div>
         <div class="row">
@@ -41,6 +69,7 @@
                                 <div class="row">
                                     <h3 class="panel-title col-xs-10">Faves</h3>
                                     <span id="faves-toggle" class="glyphicon glyphicon-collapse-down col-xs-2 text-right" aria-hidden="true"></span>
+                                    <span class="sr-only">Toggle favorites</span>
                                 </div>
                             </div>
                             <div id="faves" class="panel-body">
@@ -63,7 +92,8 @@
         </div>
     </div>
 
-
+    <script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/js/bootstrap.min.js" integrity="sha384-Tc5IQib027qvyjSMfHjOMaLkfuWVxZxUPnCJA7l2mCWNIpG9mGCD8wGNIcPD7Txa"
+        crossorigin="anonymous"></script>
     <script src="assets/scripts/main.js"></script>
 </body>
 
