@@ -76,7 +76,7 @@ h4 {
         opacity: .5;
         position: fixed;
         z-index: 999;
-        top: 10px;
+        bottom: 10px;
         right: 0px;
     }
     #clear-data:hover {
