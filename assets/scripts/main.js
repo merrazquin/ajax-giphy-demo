@@ -177,52 +177,36 @@ function createGIFPanel(id, title, rating, stillURL, animatedURL, maxWidth, fave
         .css("max-width", maxWidth + "px")
         .data({ id: id, title: title, rating: rating, stillURL: stillURL, animatedURL: animatedURL, maxWidth: maxWidth })
         .append(
-            // image
-            $("<img>")
-                .addClass("gif img-responsive")
-                .attr("alt", "GIF: " + title)
-                .attr("src", stillURL)
-                .attr("data-isStill", 1)
-                .attr("data-stillURL", stillURL)
-                .attr("data-animatedURL", animatedURL),
-            // footer
+            $("<div>")
+                .addClass("panel-body")
+                // image
+                .append($("<img>")
+                    .addClass("gif img-responsive")
+                    .attr("alt", "GIF: " + title)
+                    .attr("src", stillURL)
+                    .attr("data-isStill", 1)
+                    .attr("data-stillURL", stillURL)
+                    .attr("data-animatedURL", animatedURL),
+                    // favorite button
+                    $("<span>")
+                        .addClass("fave glyphicon glyphicon-heart" + (faved ? " faved" : ""))
+                        .attr("aria-hidden", "true"),
+                    $('<span class="sr-only">Favorite</span>'),
+                    // download button
+                    $("<a>")
+                        .attr("href", animatedURL)
+                        .addClass("download")
+                        .attr("download", "img.gif")
+                        .html('<span class="glyphicon glyphicon-download-alt" aria-hidden="true"></span><span class="sr-only">Download</span>'))
+            ,
+            // footer (title & rating)
             $("<div>")
                 .addClass("panel-footer")
                 .append(
-                    $("<div>")
-                        .addClass("row")
-                        .append(
-                            // GIF title
-                            $("<h4>")
-                                .addClass("col-xs-10 text-left")
-                                .text(title),
-                            // favorite button
-                            $("<span>")
-                                .addClass("col-xs-2 text-right")
-                                .append(
-                                    $("<span>")
-                                        .addClass("fave glyphicon glyphicon-heart" + (faved ? " faved" : ""))
-                                        .attr("aria-hidden", "true"),
-                                    $('<span class="sr-only">Favorite</span>')
-                                )
-                        ),
-                    $("<div>")
-                        .addClass("row")
-                        .append(
-                            // rating
-                            $("<span>")
-                                .addClass("col-xs-10")
-                                .text("Rating: " + rating.toUpperCase()),
-                            // download button
-                            $("<span>")
-                                .addClass("col-xs-2 text-right")
-                                .append(
-                                    $("<a>")
-                                        .attr("href", animatedURL)
-                                        .attr("download", "img.gif")
-                                        .html('<span class="glyphicon glyphicon-download-alt" aria-hidden="true"></span><span class="sr-only">Download</span>')
-                                )
-                        )
+                    $("<h4>")
+                        .text(title),
+                    $("<p>")
+                        .text("Rating: " + rating.toUpperCase())
                 )
         );
 }

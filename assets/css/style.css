@@ -24,13 +24,38 @@ h4 {
     vertical-align: top;
 }
 
-.fave {
-    cursor: pointer;
-    color: grey;
+.gif-panel {
+    position: relative;
 }
 
-.faved {
+.gif-panel .panel-body {
+    padding: 0px;
+    position: relative;
+}
+
+.fave, .download {
+    cursor: pointer;
+    color: white;
+    position: absolute;
+    text-shadow: 0 0 3px black;
+    right: 5px;
+    font-size: 1.2em;
+}
+
+.download {
+    bottom: 5px;
+}
+
+.fave {
+    top: 5px;
+}
+
+.faved, .fave:hover {
     color: red;
+}
+
+.faved:hover, .download:hover {
+    color: white;
 }
 
 #faves-heading {
