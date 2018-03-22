@@ -60,6 +60,7 @@ var defaultLimit = 10;
 var limitOffset = 0;
 var favesHidden = true;
 var storedFaves = JSON.parse(localStorage.getItem("favorites")) || {};
+var foodOfTheDay = null;
 
 /**
  * Displays a button for each topic
@@ -67,11 +68,21 @@ var storedFaves = JSON.parse(localStorage.getItem("favorites")) || {};
 function setupTopicButtons() {
     $("#topic-buttons").empty();
 
-    topics.forEach(topic => {
+    let allTopics = topics.slice();
+    if (foodOfTheDay) allTopics.push(foodOfTheDay);
+    allTopics.forEach(topic => {
+        let buttonClass = "btn btn-default topic";
+        if (topic == foodOfTheDay) {
+            buttonClass += " btn-info";
+        }
+        else if (defaultTopics.indexOf(topic) == -1) {
+            buttonClass += " btn-warning";
+        }
+
         $("#topic-buttons").append(
 
             $("<button>")
-                .addClass("btn btn-default topic" + (defaultTopics.indexOf(topic) == -1 ? " btn-warning" : ""))
+                .addClass(buttonClass)
                 .text(topic)
                 .attr("data-name", topic)
         );
@@ -215,7 +226,7 @@ function createGIFPanel(id, title, rating, stillURL, animatedURL, maxWidth, fave
  * When topic buton is clicked, queryGiphyAPI is called with the selected topic & default limit
  */
 function topicClicked() {
-    var newTopic = $(this).attr("data-name");
+    let newTopic = $(this).attr("data-name");
 
     if (newTopic != currentTopic) {
         limitOffset = 0;
@@ -234,6 +245,9 @@ function toggleGIF() {
     // grab reference to clicked gif, and find out if it's currently still
     let gif = $(this)
     let isStill = Number(gif.attr("data-isStill"));
+
+    // turn off animation on all others (not part of the assignment)
+    // $(".gif[data-isStill=0]").each(function (i) { $(this).attr("data-isStill", 1); $(this).attr("src", $(this).attr("data-stillURL")) });
 
     // swap the src URL based on current state
     if (isStill) {
@@ -264,7 +278,7 @@ function addFood(event) {
         return;
     }
 
-    if (topics.indexOf(topic) != -1) {
+    if (topics.indexOf(topic) != -1 || topic == foodOfTheDay) {
         $(".form-group").addClass("has-error");
         $("#food-type").val("");
         $("#food-type").attr("placeholder", "already in use");
@@ -420,4 +434,27 @@ $(function () {
     setupTopicButtons();
     setupFavorites()
     setupListeners();
+
+    // Add the food of the day (pull today's national food holiday using rss2json api)
+    $.ajax({
+        url: 'https://api.rss2json.com/v1/api.json',
+        method: 'GET',
+        dataType: 'json',
+        data: {
+            rss_url: 'https://foodimentary.com/feed/',
+            api_key: 'rv4krou4oxcj8fpt6hx5btus0ccexoyo27cpredh', // put your api key here
+            count: 2
+        }
+    }).done(function (result) {
+
+        if (result.status != 'ok') {
+            //die silently
+        }
+
+        let title = result.items[0].title;
+
+        // parse "today's food" from the title normally in the form of "[date] is National ____ Day!"
+        foodOfTheDay = title.substring(title.indexOf("National") + "National".length, title.indexOf("Day")).trim().toLowerCase();
+        setupTopicButtons();
+    });
 });

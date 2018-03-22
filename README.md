@@ -9,6 +9,7 @@ Simple application that allows you to pull GIFs from the Giphy API.
 * Selecting the same topic more than once will add new GIFs (rather than refreshing with same GIFs)
 * Favorites and custom "topics" saved to local storage
     * Clear storage button allows users to clear out all favorites and custom topics
+* "Food of the day" pulled from the RSS feed of foodimentary.com
 
 ## Built with
 * Bootstrap
