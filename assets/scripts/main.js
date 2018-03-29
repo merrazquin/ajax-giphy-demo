@@ -11,7 +11,7 @@ This is the application ID, you should send with each API request.
 Application Keys	d5e1c50a800e688df04be58ed34388ff
 */
 
-const GIPHY_API_KEY = "3p7b4CMXTX8JPnjVpCpn9CM7uDYuPNAe";
+var GIPHY_API_KEY = "3p7b4CMXTX8JPnjVpCpn9CM7uDYuPNAe";
 
 var rating = "g";
 var defaultTopics = ["pasta", "boba tea", "sushi", "ramen"];
@@ -29,10 +29,10 @@ var foodOfTheDay = null;
 function setupTopicButtons() {
     $("#topic-buttons").empty();
 
-    let allTopics = topics.slice();
+    var allTopics = topics.slice();
     if (foodOfTheDay) allTopics.push(foodOfTheDay);
     allTopics.forEach(topic => {
-        let buttonClass = "btn btn-default topic";
+        var buttonClass = "btn btn-default topic";
         if (topic == foodOfTheDay) {
             buttonClass += " btn-info";
         }
@@ -62,12 +62,12 @@ function setupFavorites() {
     $("#faves").empty();
 
     // populate any existing favorites from local storage
-    for (let faveKey in storedFaves) {
-        let storedFave = storedFaves[faveKey];
+    for (var faveKey in storedFaves) {
+        var storedFave = storedFaves[faveKey];
         $("#faves").append(createGIFPanel(faveKey, storedFave.title, storedFave.rating, storedFave.stillURL, storedFave.animatedURL, storedFave.maxWidth, true));
     }
 
-    let numFaves = Object.keys(storedFaves).length;
+    var numFaves = Object.keys(storedFaves).length;
     if (numFaves && favesHidden) {
         toggleFavoritesPanel();
     }
@@ -109,7 +109,7 @@ function queryGiphyAPI(keyword, limit, offset) {
         "&api_key=" + GIPHY_API_KEY,
 
         function (result) {
-            let data = result.data;
+            var data = result.data;
 
             // empty display only if this is the first set of results
             if (!offset) {
@@ -187,7 +187,7 @@ function createGIFPanel(id, title, rating, stillURL, animatedURL, maxWidth, fave
  * When topic buton is clicked, queryGiphyAPI is called with the selected topic & default limit
  */
 function topicClicked() {
-    let newTopic = $(this).attr("data-name");
+    var newTopic = $(this).attr("data-name");
 
     if (newTopic != currentTopic) {
         limitOffset = 0;
@@ -204,8 +204,8 @@ function topicClicked() {
  */
 function toggleGIF() {
     // grab reference to clicked gif, and find out if it's currently still
-    let gif = $(this)
-    let isStill = Number(gif.attr("data-isStill"));
+    var gif = $(this)
+    var isStill = Number(gif.attr("data-isStill"));
 
     // turn off animation on all others (not part of the assignment)
     // $(".gif[data-isStill=0]").each(function (i) { $(this).attr("data-isStill", 1); $(this).attr("src", $(this).attr("data-stillURL")) });
@@ -230,7 +230,7 @@ function addFood(event) {
     // don't submit the form 
     event.preventDefault();
 
-    let topic = $("#food-type").val().toLowerCase().trim();
+    var topic = $("#food-type").val().toLowerCase().trim();
 
     // if the input is empty, show an error and return
     if (!topic) {
@@ -294,7 +294,7 @@ function addFood(event) {
  * Open and close the favorites panel
  */
 function toggleFavoritesPanel() {
-    let toggleButton = $("#faves-toggle");
+    var toggleButton = $("#faves-toggle");
 
     // check the glyphicon being used to determine the current state
     if (favesHidden) {
@@ -320,7 +320,7 @@ function toggleFavorite() {
         toggleFavoritesPanel();
     }
 
-    let panel = $(this).parents(".gif-panel");
+    var panel = $(this).parents(".gif-panel");
     if ($(this).hasClass("faved")) {
         // remove it from the stored favorites
         delete storedFaves[panel.data().id];
@@ -412,7 +412,7 @@ $(function () {
             //die silently
         }
 
-        let title = result.items[0].title;
+        var title = result.items[0].title;
 
         // parse "today's food" from the title normally in the form of "[date] is National ____ Day!"
         // could also be "[date] is ___ day" such as "March 22nd is World Water day"
