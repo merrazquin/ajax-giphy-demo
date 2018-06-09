@@ -35,6 +35,7 @@ function setupTopicButtons() {
         var buttonClass = "btn btn-default topic";
         if (topic == foodOfTheDay) {
             buttonClass += " btn-info";
+            topic = twemoji.parse(topic);
         }
         else if (defaultTopics.indexOf(topic) == -1) {
             buttonClass += " btn-warning";
@@ -44,8 +45,8 @@ function setupTopicButtons() {
 
             $("<button>")
                 .addClass(buttonClass)
-                .text(topic)
-                .attr("data-name", topic)
+                .html(topic)
+                .attr("data-name", topic.replace(/<[^>]*>/gi, ''))
         );
     });
 
